@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Menu {
+  id        String   @id @default(uuid())
+  date      String   @unique // YYYY-MM-DD
+  content   String
+  postedAt  DateTime @default(now())
+  expiresAt DateTime
+  messageId String?
+  channelId String?
+  isClosed  Boolean  @default(false)
+  orders    Order[]
+
+  @@map("menus")
+}
+
+model User {
+  id          String   @id
+  displayName String
+  orders      Order[]
+
+  @@map("users")
+}
+
+model Order {
+  id        String   @id @default(uuid())
+  menuId    String
+  menu      Menu     @relation(fields: [menuId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  orderedAt   DateTime @default(now())
+
+  @@unique([menuId, userId])
+  @@map("orders")
+}
