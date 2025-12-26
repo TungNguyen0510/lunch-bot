@@ -18,6 +18,7 @@ import { orderCommand } from './commands/order';
 import { statsCommand } from './commands/stats';
 import { OrderService } from './services/OrderService';
 import { createMenuEmbed } from './utils/embeds';
+import { getTodayString } from './utils/dateUtils';
 
 // Simple command map for now
 const commands = new Map();
@@ -31,10 +32,10 @@ client.once('ready', () => {
 });
 
 client.on('interactionCreate', async (interaction: Interaction) => {
-    // Sync user displayName
+    // Sync user displayName (non-blocking)
     if (interaction.user) {
         const displayName = (interaction.member as any)?.displayName || interaction.user.username;
-        await prisma.user.upsert({
+        prisma.user.upsert({
             where: { id: interaction.user.id },
             update: { displayName },
             create: { id: interaction.user.id, displayName },
@@ -47,12 +48,24 @@ client.on('interactionCreate', async (interaction: Interaction) => {
 
         try {
             await command.execute(interaction);
-        } catch (error) {
-            console.error(error);
-            if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-            } else {
-                await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+        } catch (error: any) {
+            console.error(`Error executing command ${interaction.commandName}:`, error);
+
+            // Handle the error centrally
+            const errorMessage = `❌ Lỗi: ${error.message || 'Đã có lỗi xảy ra khi thực hiện lệnh này.'}`;
+
+            try {
+                if (interaction.replied || interaction.deferred) {
+                    await interaction.followUp({ content: errorMessage, ephemeral: true });
+                } else {
+                    await interaction.reply({ content: errorMessage, ephemeral: true });
+                }
+            } catch (replyError: any) {
+                if (replyError.code === 40060) {
+                    console.warn('Interaction already acknowledged, ignoring duplicate reply attempt.');
+                } else {
+                    console.error('Failed to send error reply:', replyError);
+                }
             }
         }
     } else if (interaction.isButton()) {
@@ -62,7 +75,7 @@ client.on('interactionCreate', async (interaction: Interaction) => {
             await interaction.deferReply({ ephemeral: true });
 
             // Get today's menu (regardless of expiration)
-            const today = new Date().toISOString().split('T')[0];
+            const today = getTodayString();
             const menu = await prisma.menu.findUnique({
                 where: { date: today },
             });
@@ -72,7 +85,7 @@ client.on('interactionCreate', async (interaction: Interaction) => {
                 return;
             }
 
-            const isExpired = menu.isClosed || new Date() > menu.expiresAt;
+            const isExpired = menu.isClosed || new Date() > new Date(menu.expiresAt);
 
             if (isExpired) {
                 // If expired but buttons are still active, disable them now
@@ -114,7 +127,12 @@ client.on('interactionCreate', async (interaction: Interaction) => {
             await interaction.message.edit({ embeds: [updatedEmbed] });
 
         } catch (error: any) {
-            await interaction.editReply(`❌ Lỗi: ${error.message}`);
+            console.error(error);
+            if (interaction.deferred || interaction.replied) {
+                await interaction.editReply(`❌ Lỗi: ${error.message}`);
+            } else {
+                await interaction.reply({ content: `❌ Lỗi: ${error.message}`, ephemeral: true });
+            }
         }
     }
 });

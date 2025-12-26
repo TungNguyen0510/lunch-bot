@@ -54,20 +54,22 @@ export const statsCommand = {
                 }
             });
 
-            const userStats = new Map<string, { displayName: string, count: number }>();
+            const userStats = new Map<string, { displayName: string, count: number, totalAmount: number }>();
             let totalMonthOrders = 0;
+            let totalMonthRevenue = 0;
 
             (menus as any).forEach((menu: any) => {
                 menu.orders.forEach((order: any) => {
-                    const stat = userStats.get(order.userId) || { displayName: order.user.displayName, count: 0 };
+                    const price = menu.price || config.price;
+                    const stat = userStats.get(order.userId) || { displayName: order.user.displayName, count: 0, totalAmount: 0 };
                     stat.count++;
+                    stat.totalAmount += price;
                     stat.displayName = order.user.displayName;
                     userStats.set(order.userId, stat);
                     totalMonthOrders++;
+                    totalMonthRevenue += price;
                 });
             });
-
-            const totalRevenue = totalMonthOrders * config.price;
 
             const embed = new EmbedBuilder()
                 .setTitle(`📊 Thống kê tháng ${inputMonth}`)
@@ -83,8 +85,7 @@ export const statsCommand = {
                 const sortedStats = [...userStats.values()].sort((a, b) => b.count - a.count);
 
                 for (const stat of sortedStats) {
-                    const amount = stat.count * config.price;
-                    const line = `${index++}. **${stat.displayName}**: ${stat.count} suất - \`${amount.toLocaleString()}\` VND\n`;
+                    const line = `${index++}. **${stat.displayName}**: ${stat.count} suất - \`${stat.totalAmount.toLocaleString()}\` VND\n`;
 
                     if (details.length + line.length > 1000) {
                         details += '...';
@@ -94,7 +95,7 @@ export const statsCommand = {
                 }
 
                 embed.addFields({ name: '👤 Chi tiết từng người', value: details });
-                embed.addFields({ name: '💰 Tổng tiền', value: `**${totalRevenue.toLocaleString()} VND**` });
+                embed.addFields({ name: '💰 Tổng tiền', value: `**${totalMonthRevenue.toLocaleString()} VND**` });
             } else {
                 embed.addFields({ name: 'Chi tiết', value: 'Chưa có dữ liệu đặt cơm trong tháng này.' });
             }
@@ -128,7 +129,8 @@ export const statsCommand = {
             }
 
             const totalOrders = menu.orders.length;
-            const totalRevenue = totalOrders * config.price;
+            const menuPrice = (menu as any).price || config.price;
+            const totalRevenue = totalOrders * menuPrice;
 
             const embed = new EmbedBuilder()
                 .setTitle(`📊 Thống kê ngày ${inputDate}`)

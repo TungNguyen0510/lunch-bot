@@ -16,6 +16,7 @@ model Menu {
   messageId String?
   channelId String?
   isClosed  Boolean  @default(false)
+  price     Int      @default(35000)
   orders    Order[]
 
   @@map("menus")

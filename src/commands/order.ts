@@ -22,7 +22,7 @@ export const orderCommand = {
             const orders = await OrderService.getOrdersForMenu(menu.id);
 
             const embed = new EmbedBuilder()
-                .setTitle(`Đặt cơm trưa cho ngày ${menu.date}`)
+                .setTitle(`Đặt cơm trưa cho ngày ${menu.date.split('-').reverse().join('/')}`)
                 .setDescription(`Tổng số suất: ${orders.length}`)
                 .setColor(0x0099FF);
 

@@ -53,7 +53,7 @@ export class OrderService {
                 },
             });
         } catch (e) {
-            throw new Error('Bạn chưa đặt suất ăn.');
+            throw new Error('Bạn chưa đặt.');
         }
     }
 

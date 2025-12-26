@@ -1,9 +1,11 @@
 import { prisma } from '../database';
 import { addMinutes } from 'date-fns';
+import { config } from '../config';
+import { getTodayString } from '../utils/dateUtils';
 
 export class MenuService {
-    static async createMenu(content: string, channelId: string, durationMinutes: number = 120) {
-        const today = new Date().toISOString().split('T')[0];
+    static async createMenu(content: string, channelId: string, durationMinutes: number = 120, price?: number) {
+        const today = getTodayString();
 
         // Check if menu exists for today
         const existing = await prisma.menu.findUnique({
@@ -15,6 +17,7 @@ export class MenuService {
         }
 
         const expiresAt = addMinutes(new Date(), durationMinutes);
+        const menuPrice = price || config.price;
 
         return prisma.menu.create({
             data: {
@@ -22,6 +25,7 @@ export class MenuService {
                 content,
                 expiresAt,
                 channelId,
+                price: menuPrice,
                 isClosed: false,
             },
         });
@@ -35,7 +39,7 @@ export class MenuService {
     }
 
     static async getActiveMenu() {
-        const today = new Date().toISOString().split('T')[0];
+        const today = getTodayString();
         const menu = await prisma.menu.findUnique({
             where: { date: today },
         });
@@ -54,7 +58,7 @@ export class MenuService {
     }
 
     static async deleteMenuToday() {
-        const today = new Date().toISOString().split('T')[0];
+        const today = getTodayString();
         const menu = await prisma.menu.findUnique({
             where: { date: today },
         });
@@ -63,7 +67,7 @@ export class MenuService {
             throw new Error('Hôm nay không có menu nào để xóa.');
         }
 
-        return prisma.$transaction([
+        await prisma.$transaction([
             prisma.order.deleteMany({
                 where: { menuId: menu.id }
             }),
@@ -71,5 +75,7 @@ export class MenuService {
                 where: { id: menu.id }
             })
         ]);
+
+        return menu;
     }
 }

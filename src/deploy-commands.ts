@@ -26,7 +26,16 @@ const rest = new REST({ version: '10' }).setToken(config.discordToken);
         );
 
         console.log(`Successfully reloaded ${(data as any).length} application (/) commands.`);
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
+        if (error.code === 50001) {
+            console.error('\n❌ ERROR: Missing Access (50001)');
+            console.error('This means the bot lacks permission to create commands in this guild.');
+            console.error('PROBABLE CAUSES:');
+            console.error('1. The CLIENT_ID or GUILD_ID in .env is incorrect.');
+            console.error('2. The bot was invited WITHOUT the "applications.commands" scope.');
+            console.error('3. The bot is not in the server with ID: ' + config.guildId);
+            console.error('\nFIX: Re-invite the bot using an invite link with "applications.commands" scope enabled.\n');
+        }
     }
 })();
