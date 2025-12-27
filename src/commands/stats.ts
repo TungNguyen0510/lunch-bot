@@ -75,7 +75,7 @@ export const statsCommand = {
                 .setTitle(`📊 Thống kê tháng ${inputMonth}`)
                 .setColor(0x0099FF)
                 .addFields(
-                    { name: '📅 Thông tin chung', value: `Tổng số ngày có menu: **${menus.length}**\nTổng số suất đã đặt: **${totalMonthOrders}**`, inline: false }
+                    { name: '📅 Thông tin chung', value: `Tổng số thực đơn: **${menus.length}**\nTổng số suất đã đặt: **${totalMonthOrders}**`, inline: false }
                 );
 
             if (userStats.size > 0) {
@@ -85,7 +85,7 @@ export const statsCommand = {
                 const sortedStats = [...userStats.values()].sort((a, b) => b.count - a.count);
 
                 for (const stat of sortedStats) {
-                    const line = `${index++}. **${stat.displayName}**: ${stat.count} suất - \`${stat.totalAmount.toLocaleString()}\` VND\n`;
+                    const line = `${index++}. **${stat.displayName}**: ${stat.count} suất - **${stat.totalAmount.toLocaleString()} VND**\n`;
 
                     if (details.length + line.length > 1000) {
                         details += '...';
@@ -112,7 +112,7 @@ export const statsCommand = {
             const [day, month, year] = inputDate.split('-');
             const dbDate = `${year}-${month}-${day}`;
 
-            const menu = await prisma.menu.findUnique({
+            const menus = await prisma.menu.findMany({
                 where: { date: dbDate },
                 include: {
                     orders: {
@@ -123,34 +123,39 @@ export const statsCommand = {
                 }
             });
 
-            if (!menu) {
-                await interaction.reply({ content: `❌ Không tìm thấy dữ liệu menu cho ngày ${inputDate}.`, ephemeral: true });
+            if (menus.length === 0) {
+                await interaction.reply({ content: `❌ Không tìm thấy dữ liệu thực đơn cho ngày ${inputDate}.`, ephemeral: true });
                 return;
             }
 
-            const totalOrders = menu.orders.length;
-            const menuPrice = (menu as any).price || config.price;
-            const totalRevenue = totalOrders * menuPrice;
+            const embeds = [];
 
-            const embed = new EmbedBuilder()
-                .setTitle(`📊 Thống kê ngày ${inputDate}`)
-                .setDescription(menu.content)
-                .setColor(0x00FF00)
-                .addFields(
-                    { name: '📅 Thông tin chung', value: `Tổng số suất: **${totalOrders}**\nTổng tiền: **${totalRevenue.toLocaleString()} VND**`, inline: false }
-                );
+            for (const menu of menus) {
+                const totalOrders = menu.orders.length;
+                const menuPrice = (menu as any).price || config.price;
+                const totalRevenue = totalOrders * menuPrice;
 
-            if (totalOrders > 0) {
-                const orderList = menu.orders
-                    .map((o, i) => `${i + 1}. **${o.user.displayName}**`)
-                    .join('\n');
+                const embed = new EmbedBuilder()
+                    .setTitle(`📊 Thống kê - ${menu.content.substring(0, 50)} (${inputDate})`)
+                    .setDescription(`Thực đơn: ${menu.content}\nGiá: **${menuPrice.toLocaleString()} VND**`)
+                    .setColor(0x00FF00)
+                    .addFields(
+                        { name: '📅 Thông tin chung', value: `Tổng số suất: **${totalOrders}**\nTổng tiền: **${totalRevenue.toLocaleString()} VND**`, inline: false }
+                    );
 
-                embed.addFields({ name: '👤 Người đặt', value: orderList });
-            } else {
-                embed.addFields({ name: '👤 Người đặt', value: '_Chưa có ai đặt_' });
+                if (totalOrders > 0) {
+                    const orderList = menu.orders
+                        .map((o, i) => `${i + 1}. **${o.user.displayName}**`)
+                        .join('\n');
+
+                    embed.addFields({ name: '👤 Người đặt', value: orderList.substring(0, 1024) });
+                } else {
+                    embed.addFields({ name: '👤 Người đặt', value: '_Chưa có ai đặt_' });
+                }
+                embeds.push(embed);
             }
 
-            await interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: embeds.slice(0, 10) });
         }
     },
 };

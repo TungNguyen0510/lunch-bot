@@ -5,11 +5,11 @@ import { createMenuEmbed } from '../utils/embeds';
 export const menuCommand = {
     data: new SlashCommandBuilder()
         .setName('menu')
-        .setDescription('Tạo menu cơm trưa')
+        .setDescription('Tạo thực đơn cơm trưa')
         .addSubcommand(subcommand =>
             subcommand
                 .setName('post')
-                .setDescription('Tạo menu cơm trưa')
+                .setDescription('Tạo thực đơn cơm trưa')
                 .addStringOption(option =>
                     option.setName('content')
                         .setDescription('Menu')
@@ -29,7 +29,7 @@ export const menuCommand = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('delete')
-                .setDescription('Xóa menu hôm nay và các order')
+                .setDescription('Xóa thực đơn hôm nay và các order')
         ),
     async execute(interaction: ChatInputCommandInteraction) {
         const subcommand = interaction.options.getSubcommand();
@@ -48,11 +48,11 @@ export const menuCommand = {
             const row = new ActionRowBuilder<ButtonBuilder>()
                 .addComponents(
                     new ButtonBuilder()
-                        .setCustomId('btn_order')
+                        .setCustomId(`btn_order:${menu.id}`)
                         .setLabel('Đặt 1 suất')
                         .setStyle(ButtonStyle.Primary),
                     new ButtonBuilder()
-                        .setCustomId('btn_cancel')
+                        .setCustomId(`btn_cancel:${menu.id}`)
                         .setLabel('Huỷ suất')
                         .setStyle(ButtonStyle.Danger)
                 );
@@ -66,7 +66,7 @@ export const menuCommand = {
         } else if (subcommand === 'delete') {
             await interaction.deferReply({ ephemeral: true });
 
-            const deletedMenu = await MenuService.deleteMenuToday();
+            const deletedMenu = await MenuService.deleteMenuLatest();
 
             // Delete message on Discord if exists
             if (deletedMenu.channelId && deletedMenu.messageId) {
@@ -84,7 +84,7 @@ export const menuCommand = {
                 }
             }
 
-            await interaction.editReply({ content: '✅ Đã xóa menu hôm nay, toàn bộ các order đính kèm và tin nhắn menu trên Discord.' });
+            await interaction.editReply({ content: '✅ Đã xóa thực đơn hôm nay, toàn bộ các order đính kèm và tin nhắn menu trên Discord.' });
         }
     },
 };

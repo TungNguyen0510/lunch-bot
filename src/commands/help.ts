@@ -9,8 +9,8 @@ export const helpCommand = {
             .setTitle('Danh sách lệnh')
             .setColor(0x0099FF)
             .addFields(
-                { name: '/menu post [content]', value: 'Tạo menu cơm trưa mới' },
-                { name: '/menu delete', value: 'Xóa menu hôm nay và tất cả order' },
+                { name: '/menu post [content]', value: 'Tạo thực đơn cơm trưa mới' },
+                { name: '/menu delete', value: 'Xóa thực đơn mới tạo gần nhất và tất cả order' },
                 { name: '/order today', value: 'Xem danh sách đặt cơm hôm nay' },
                 { name: '/stats month [MM-YYYY]', value: 'Xem thống kê tháng' },
                 { name: '/stats day [DD-MM-YYYY]', value: 'Xem thống kê ngày' },

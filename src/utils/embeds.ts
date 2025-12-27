@@ -8,7 +8,7 @@ export function createMenuEmbed(menu: any, orders: any[]) {
         : '_Chưa có người đặt_';
 
     const embed = new EmbedBuilder()
-        .setTitle(`🍱 Cơm ngày ${menu.date.split('-').reverse().join('/')}`)
+        .setTitle(`🍱 Ngày ${menu.date.split('-').reverse().join('/')}`)
         .setDescription(menu.content)
         .setColor(isExpired ? 0xFF0000 : 0x00FF00) // Red if expired, Green if active
         .addFields(

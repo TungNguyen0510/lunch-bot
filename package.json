@@ -4,10 +4,11 @@
   "description": "Discord Lunch Ordering Bot",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && ts-node src/deploy-commands.ts",
     "start": "node dist/index.js",
     "dev": "nodemon",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "deploy-commands": "ts-node src/deploy-commands.ts"
   },
   "keywords": [],
   "author": "",

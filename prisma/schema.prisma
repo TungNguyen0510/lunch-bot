@@ -9,7 +9,7 @@ datasource db {
 
 model Menu {
   id        String   @id @default(uuid())
-  date      String   @unique // YYYY-MM-DD
+  date      String   // YYYY-MM-DD
   content   String
   postedAt  DateTime @default(now())
   expiresAt DateTime

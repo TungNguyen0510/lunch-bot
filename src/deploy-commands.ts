@@ -21,7 +21,7 @@ const rest = new REST({ version: '10' }).setToken(config.discordToken);
         // The put method is used to fully refresh all commands in the guild with the current set
         // Using Guild commands for instant update. Global commands take 1 hour.
         const data = await rest.put(
-            Routes.applicationGuildCommands(config.clientId, config.guildId),
+            Routes.applicationCommands(config.clientId),
             { body: commands },
         );
 

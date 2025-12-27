@@ -2,8 +2,8 @@ import { prisma } from '../database';
 import { MenuService } from './MenuService';
 
 export class OrderService {
-    static async placeOrder(userId: string, displayName: string) {
-        const menu = await MenuService.getActiveMenu();
+    static async placeOrder(userId: string, displayName: string, menuId: string) {
+        const menu = await MenuService.getActiveMenu(menuId);
         if (!menu) {
             throw new Error('Menu đã hết hạn hoặc không tồn tại.');
         }
@@ -37,8 +37,8 @@ export class OrderService {
         });
     }
 
-    static async cancelOrder(userId: string) {
-        const menu = await MenuService.getActiveMenu();
+    static async cancelOrder(userId: string, menuId: string) {
+        const menu = await MenuService.getActiveMenu(menuId);
         if (!menu) {
             throw new Error('Menu không tồn tại.');
         }

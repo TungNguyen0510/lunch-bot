@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Collection, Interaction, ActionRowBuilder } from 'discord.js';
+import { Client, GatewayIntentBits, Interaction, ActionRowBuilder } from 'discord.js';
 import { config } from './config';
 import { prisma } from './database';
 // Import handlers later
@@ -27,7 +27,7 @@ commands.set(orderCommand.data.name, orderCommand);
 commands.set(statsCommand.data.name, statsCommand);
 commands.set(helpCommand.data.name, helpCommand);
 
-client.once('ready', () => {
+client.once('clientReady', () => {
     console.log(`Logged in as ${client.user?.tag}!`);
 });
 
@@ -74,14 +74,20 @@ client.on('interactionCreate', async (interaction: Interaction) => {
         try {
             await interaction.deferReply({ ephemeral: true });
 
-            // Get today's menu (regardless of expiration)
-            const today = getTodayString();
+            // Phân tách customId để lấy menuId (format: btn_order:menuId hoặc btn_cancel:menuId)
+            const [action, menuId] = customId.split(':');
+
+            if (!menuId) {
+                await interaction.editReply('❌ Lỗi: Không tìm thấy ID thực đơn.');
+                return;
+            }
+
             const menu = await prisma.menu.findUnique({
-                where: { date: today },
+                where: { id: menuId },
             });
 
             if (!menu) {
-                await interaction.editReply('❌ Menu không tồn tại.');
+                await interaction.editReply('❌ Thực đơn không tồn tại.');
                 return;
             }
 
@@ -112,16 +118,16 @@ client.on('interactionCreate', async (interaction: Interaction) => {
                 return;
             }
 
-            if (customId === 'btn_order') {
+            if (action === 'btn_order') {
                 const displayName = (interaction.member as any)?.displayName || user.username;
-                await OrderService.placeOrder(user.id, displayName);
+                await OrderService.placeOrder(user.id, displayName, menu.id);
                 await interaction.editReply('✅ Đặt cơm thành công!');
-            } else if (customId === 'btn_cancel') {
-                await OrderService.cancelOrder(user.id);
+            } else if (action === 'btn_cancel') {
+                await OrderService.cancelOrder(user.id, menu.id);
                 await interaction.editReply('✅ Huỷ suất thành công!');
             }
 
-            // Update menu embed for active menu
+            // Update menu embed for the specific menu
             const orders = await OrderService.getOrdersForMenu(menu.id);
             const updatedEmbed = createMenuEmbed(menu, orders);
             await interaction.message.edit({ embeds: [updatedEmbed] });

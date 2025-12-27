@@ -7,14 +7,7 @@ export class MenuService {
     static async createMenu(content: string, channelId: string, durationMinutes: number = 120, price?: number) {
         const today = getTodayString();
 
-        // Check if menu exists for today
-        const existing = await prisma.menu.findUnique({
-            where: { date: today },
-        });
-
-        if (existing) {
-            throw new Error('Hôm nay đã có menu.');
-        }
+        // Bỏ kiểm tra menu tồn tại để cho phép nhiều menu
 
         const expiresAt = addMinutes(new Date(), durationMinutes);
         const menuPrice = price || config.price;
@@ -38,16 +31,35 @@ export class MenuService {
         });
     }
 
-    static async getActiveMenu() {
+    static async getActiveMenu(menuId?: string) {
+        if (menuId) {
+            return prisma.menu.findUnique({
+                where: { id: menuId },
+            });
+        }
+
         const today = getTodayString();
-        const menu = await prisma.menu.findUnique({
-            where: { date: today },
+        // Lấy menu mới nhất của ngày hôm nay chưa đóng và chưa hết hạn
+        const menus = await prisma.menu.findMany({
+            where: {
+                date: today,
+                isClosed: false,
+                expiresAt: {
+                    gt: new Date()
+                }
+            },
+            orderBy: { postedAt: 'desc' },
+            take: 1
         });
 
-        if (!menu || menu.isClosed || new Date() > menu.expiresAt) {
-            return null;
-        }
-        return menu;
+        return menus.length > 0 ? menus[0] : null;
+    }
+
+    static async getMenusByDate(date: string) {
+        return prisma.menu.findMany({
+            where: { date },
+            orderBy: { postedAt: 'asc' },
+        });
     }
 
     static async closeMenu(menuId: string) {
@@ -57,14 +69,15 @@ export class MenuService {
         });
     }
 
-    static async deleteMenuToday() {
+    static async deleteMenuLatest() {
         const today = getTodayString();
-        const menu = await prisma.menu.findUnique({
+        const menu = await prisma.menu.findFirst({
             where: { date: today },
+            orderBy: { postedAt: 'desc' }
         });
 
         if (!menu) {
-            throw new Error('Hôm nay không có menu nào để xóa.');
+            throw new Error('Hôm nay không có thực đơn nào để xóa.');
         }
 
         await prisma.$transaction([
