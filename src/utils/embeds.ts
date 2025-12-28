@@ -14,7 +14,7 @@ export function createMenuEmbed(menu: any, orders: any[]) {
         .addFields(
             { name: 'Giá', value: `${menu.price.toLocaleString()} VND`, inline: true },
             {
-                name: 'Hết hạn',
+                name: isExpired ? '' : 'Hết hạn trong',
                 value: isExpired ? '**Đã hết hạn**' : `<t:${Math.floor(menu.expiresAt.getTime() / 1000)}:R>`,
                 inline: true
             },

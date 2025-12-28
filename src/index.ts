@@ -109,19 +109,19 @@ client.on('interactionCreate', async (interaction: Interaction) => {
                 });
 
                 await interaction.message.edit({
-                    content: '🛑 Đã hết hạn đặt cơm.',
+                    content: '🛑 Đã hết hạn đặt.',
                     embeds: [embed],
                     components: newComponents as any
                 });
 
-                await interaction.editReply('❌ Rất tiếc, đã hết hạn đặt cơm.');
+                await interaction.editReply('❌ Rất tiếc, đã hết hạn đặt.');
                 return;
             }
 
             if (action === 'btn_order') {
                 const displayName = (interaction.member as any)?.displayName || user.username;
                 await OrderService.placeOrder(user.id, displayName, menu.id);
-                await interaction.editReply('✅ Đặt cơm thành công!');
+                await interaction.editReply('✅ Đặt thành công!');
             } else if (action === 'btn_cancel') {
                 await OrderService.cancelOrder(user.id, menu.id);
                 await interaction.editReply('✅ Huỷ suất thành công!');
