@@ -100,7 +100,7 @@ export const statsCommand = {
                 embed.addFields({ name: 'Chi tiết', value: 'Chưa có dữ liệu đặt cơm trong tháng này.' });
             }
 
-            await interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed], ephemeral: true });
         } else if (subcommand === 'day') {
             const inputDate = interaction.options.getString('date');
 
@@ -155,7 +155,7 @@ export const statsCommand = {
                 embeds.push(embed);
             }
 
-            await interaction.reply({ embeds: embeds.slice(0, 10) });
+            await interaction.reply({ embeds: embeds.slice(0, 10), ephemeral: true });
         }
     },
 };

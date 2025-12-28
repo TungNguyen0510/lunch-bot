@@ -52,7 +52,7 @@ export const orderCommand = {
                 embeds.push(embed);
             }
 
-            await interaction.reply({ embeds: embeds.slice(0, 10) }); // Discord allows up to 10 embeds
+            await interaction.reply({ embeds: embeds.slice(0, 10), ephemeral: true }); // Discord allows up to 10 embeds
         }
     },
 };
