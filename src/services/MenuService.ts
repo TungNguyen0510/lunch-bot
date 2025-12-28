@@ -77,7 +77,7 @@ export class MenuService {
         });
 
         if (!menu) {
-            throw new Error('Hôm nay không có thực đơn nào để xóa.');
+            throw new Error('Hôm nay không có menu nào để xóa.');
         }
 
         await prisma.$transaction([

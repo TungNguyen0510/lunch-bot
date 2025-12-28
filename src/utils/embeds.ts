@@ -9,7 +9,7 @@ export function createMenuEmbed(menu: any, orders: any[]) {
 
     const embed = new EmbedBuilder()
         .setTitle(`🍱 Ngày ${menu.date.split('-').reverse().join('/')}`)
-        .setDescription(menu.content)
+        .setDescription(`Menu: ${menu.content}`)
         .setColor(isExpired ? 0xFF0000 : 0x00FF00) // Red if expired, Green if active
         .addFields(
             { name: 'Giá', value: `${menu.price.toLocaleString()} VND`, inline: true },

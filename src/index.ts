@@ -18,7 +18,6 @@ import { orderCommand } from './commands/order';
 import { statsCommand } from './commands/stats';
 import { OrderService } from './services/OrderService';
 import { createMenuEmbed } from './utils/embeds';
-import { getTodayString } from './utils/dateUtils';
 
 // Simple command map for now
 const commands = new Map();
@@ -78,7 +77,7 @@ client.on('interactionCreate', async (interaction: Interaction) => {
             const [action, menuId] = customId.split(':');
 
             if (!menuId) {
-                await interaction.editReply('❌ Lỗi: Không tìm thấy ID thực đơn.');
+                await interaction.editReply('❌ Lỗi: Không tìm thấy ID menu.');
                 return;
             }
 
@@ -87,7 +86,7 @@ client.on('interactionCreate', async (interaction: Interaction) => {
             });
 
             if (!menu) {
-                await interaction.editReply('❌ Thực đơn không tồn tại.');
+                await interaction.editReply('❌ Menu không tồn tại.');
                 return;
             }
 

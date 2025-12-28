@@ -75,7 +75,7 @@ export const statsCommand = {
                 .setTitle(`📊 Thống kê tháng ${inputMonth}`)
                 .setColor(0x0099FF)
                 .addFields(
-                    { name: '📅 Thông tin chung', value: `Tổng số thực đơn: **${menus.length}**\nTổng số suất đã đặt: **${totalMonthOrders}**`, inline: false }
+                    { name: '📅 Thông tin chung', value: `Tổng số menu: **${menus.length}**\nTổng số suất đã đặt: **${totalMonthOrders}**`, inline: false }
                 );
 
             if (userStats.size > 0) {
@@ -124,7 +124,7 @@ export const statsCommand = {
             });
 
             if (menus.length === 0) {
-                await interaction.reply({ content: `❌ Không tìm thấy dữ liệu thực đơn cho ngày ${inputDate}.`, ephemeral: true });
+                await interaction.reply({ content: `❌ Không tìm thấy dữ liệu menu cho ngày ${inputDate}.`, ephemeral: true });
                 return;
             }
 
@@ -137,7 +137,7 @@ export const statsCommand = {
 
                 const embed = new EmbedBuilder()
                     .setTitle(`📊 Thống kê - ${menu.content.substring(0, 50)} (${inputDate})`)
-                    .setDescription(`Thực đơn: ${menu.content}\nGiá: **${menuPrice.toLocaleString()} VND**`)
+                    .setDescription(`Menu: ${menu.content}\nGiá: **${menuPrice.toLocaleString()} VND**`)
                     .setColor(0x00FF00)
                     .addFields(
                         { name: '📅 Thông tin chung', value: `Tổng số suất: **${totalOrders}**\nTổng tiền: **${totalRevenue.toLocaleString()} VND**`, inline: false }

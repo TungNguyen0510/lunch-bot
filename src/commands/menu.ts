@@ -5,11 +5,11 @@ import { createMenuEmbed } from '../utils/embeds';
 export const menuCommand = {
     data: new SlashCommandBuilder()
         .setName('menu')
-        .setDescription('Tạo thực đơn cơm trưa')
+        .setDescription('Tạo menu cơm trưa')
         .addSubcommand(subcommand =>
             subcommand
                 .setName('post')
-                .setDescription('Tạo thực đơn cơm trưa')
+                .setDescription('Tạo menu cơm trưa')
                 .addStringOption(option =>
                     option.setName('content')
                         .setDescription('Menu')
@@ -29,7 +29,7 @@ export const menuCommand = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('delete')
-                .setDescription('Xóa thực đơn hôm nay và các order')
+                .setDescription('Xóa menu mới tạo gần nhất và tất cả order')
         ),
     async execute(interaction: ChatInputCommandInteraction) {
         const subcommand = interaction.options.getSubcommand();
@@ -84,7 +84,7 @@ export const menuCommand = {
                 }
             }
 
-            await interaction.editReply({ content: '✅ Đã xóa thực đơn hôm nay, toàn bộ các order đính kèm và tin nhắn menu trên Discord.' });
+            await interaction.editReply({ content: '✅ Đã xóa menu mới tạo gần nhất, toàn bộ các order đính kèm và tin nhắn menu trên Discord.' });
         }
     },
 };
